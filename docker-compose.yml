@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+    db:
+        image: postgres:11.6
+        restart: always
+        environment:
+            POSTGRES_USER: essteempguser
+            POSTGRES_PASSWORD: essteempgpassword
+            POSTGRES_DB: essteemdb
+        volumes:
+            - ./db/development/data:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+    pgadmin:
+        image: dpage/pgadmin4
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: essteempguser
+            PGADMIN_DEFAULT_PASSWORD: essteempgpassword
+        volumes:
+            - ./db/development/servers.json:/pgadmin4/servers.json
+            - ./db/development/pgpassfile:/pgadmin4/.pgpass
+        ports:
+            - 4000:80
+        depends_on:
+            - db
+    web:
+        build: .
+        command: python manage.py runserver 0.0.0.0:8000
+        volumes:
+            - .:/code
+        ports:
+            - "8000:8000"
+        depends_on:
+            - db
